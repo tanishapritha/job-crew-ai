@@ -74,6 +74,7 @@
     <nav class="dash-tabs">
       <button class="dash-tab active" data-section="profile">Profile</button>
       <button class="dash-tab" data-section="preferences">Preferences</button>
+      <button class="dash-tab" data-section="jobs">Jobs</button>
       <button class="dash-tab" data-section="status">Status</button>
     </nav>
 
@@ -162,6 +163,23 @@
           <button type="submit" class="btn-primary">Save Preferences</button>
           <span id="pref-status-msg" class="inline-msg"></span>
         </form>
+
+        <div class="search-now-bar">
+          <button id="btn-search-now" class="btn-search">Search Jobs Now</button>
+          <span id="search-status-msg" class="inline-msg"></span>
+        </div>
+      </section>
+
+      <!-- Jobs Results -->
+      <section id="section-jobs" class="section">
+        <div class="jobs-header">
+          <h3>Job Results</h3>
+          <span id="jobs-count" class="jobs-count"></span>
+        </div>
+        <div id="jobs-empty" class="jobs-empty">
+          <p>No jobs loaded yet. Go to <strong>Preferences</strong> and click <strong>Search Jobs Now</strong>.</p>
+        </div>
+        <div id="jobs-grid" class="jobs-grid"></div>
       </section>
 
       <!-- Status -->

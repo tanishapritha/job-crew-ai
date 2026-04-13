@@ -30,6 +30,41 @@ class ActionRequest(BaseModel):
     action: str
     payload: dict = {}
 
+
+def _search_jobs(payload: dict) -> list:
+    """Immediate job search using the provider registry."""
+    from tools.job_providers import search_all_providers
+
+    domains = [d.strip() for d in payload.get("domains", "").split(";") if d.strip()]
+    locations = [l.strip() for l in [
+        payload.get("location_1", ""),
+        payload.get("location_2", ""),
+        payload.get("location_3", ""),
+    ] if l.strip()]
+
+    if not domains:
+        raise ValueError("No job titles provided")
+    if not locations:
+        locations = ["India"]
+
+    all_jobs = []
+    seen = set()
+
+    for domain in domains:
+        for location in locations:
+            results = search_all_providers(
+                domain=domain, location=location,
+                limit=10, max_days_old=14,
+            )
+            for job in results:
+                key = (job["title"].lower(), job["company"].lower())
+                if key not in seen:
+                    seen.add(key)
+                    job["matched_domain"] = domain
+                    all_jobs.append(job)
+
+    return all_jobs
+
 @app.post("/")
 async def handle_action(request: ActionRequest):
     action = request.action
@@ -58,6 +93,7 @@ async def handle_action(request: ActionRequest):
         "approvePayment": payment_service.approve,
         "rejectPayment": payment_service.reject,
         "getPaymentAnalytics": payment_service.get_analytics,
+        "searchJobs": _search_jobs,
     }
 
     if action not in routes:

@@ -2,7 +2,7 @@
    Job Engine — Frontend Logic
    ============================================ */
 
-const API = "http://127.0.0.1:8000";
+const API = "https://tanishapritha-job-crew.hf.space";
 
 // ---- State ----
 let currentUser = null;
@@ -212,6 +212,95 @@ $("#btn-unsubscribe").addEventListener("click", () => {
     setStatus("unsubscribed");
   }
 });
+
+// ---- Search Jobs Now ----
+$("#btn-search-now").addEventListener("click", async () => {
+  const btn = $("#btn-search-now");
+  const msg = $("#search-status-msg");
+  const domains = $("#pref-domains").value.trim();
+
+  if (!domains) {
+    flashMsg(msg, "Enter job titles first", "error");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Searching...";
+  flashMsg(msg, "", "");
+
+  try {
+    const jobs = await api("searchJobs", {
+      domains: domains,
+      location_1: $("#pref-loc1").value.trim(),
+      location_2: $("#pref-loc2").value.trim(),
+      location_3: $("#pref-loc3").value.trim(),
+    });
+
+    renderJobs(jobs);
+
+    // Switch to Jobs tab
+    $$(".dash-tab").forEach(t => t.classList.remove("active"));
+    $$(".section").forEach(s => s.classList.remove("active"));
+    document.querySelector('[data-section="jobs"]').classList.add("active");
+    $("#section-jobs").classList.add("active");
+
+    flashMsg(msg, `Found ${jobs.length} jobs`, "success");
+  } catch (err) {
+    flashMsg(msg, err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Search Jobs Now";
+  }
+});
+
+function renderJobs(jobs) {
+  const grid = $("#jobs-grid");
+  const empty = $("#jobs-empty");
+  const count = $("#jobs-count");
+
+  if (!jobs || jobs.length === 0) {
+    grid.innerHTML = "";
+    empty.style.display = "block";
+    count.textContent = "";
+    return;
+  }
+
+  empty.style.display = "none";
+  count.textContent = `${jobs.length} jobs found`;
+
+  grid.innerHTML = jobs.map(job => {
+    const source = (job.source || "unknown").toLowerCase();
+    const sourceLabel = source.charAt(0).toUpperCase() + source.slice(1);
+    const sourceClass = `job-source job-source-${source}`;
+    const location = job.location || "Location not specified";
+    const company = job.company || "Unknown Company";
+    const url = job.redirect_url || "#";
+    const domain = job.matched_domain || "";
+
+    return `
+      <div class="job-card">
+        <div class="job-info">
+          <div class="job-title">${escapeHtml(job.title)}</div>
+          <div class="job-company">${escapeHtml(company)}</div>
+          <div class="job-meta">
+            <span class="job-location">${escapeHtml(location)}</span>
+            <span class="${sourceClass}">${sourceLabel}</span>
+            ${domain ? `<span class="job-domain">${escapeHtml(domain)}</span>` : ""}
+          </div>
+        </div>
+        <div class="job-actions">
+          <a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="btn-apply">Apply</a>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text || "";
+  return div.innerHTML;
+}
 
 // ---- Logout ----
 $("#logout-btn").addEventListener("click", () => {
