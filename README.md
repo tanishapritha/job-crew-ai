@@ -1,3 +1,12 @@
+---
+title: Job Crew
+emoji: 🚀
+colorFrom: gray
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # Job Automation System Backend
 
 A production-ready Job Automation SaaS backend built with **FastAPI** for pure, deterministic CRUD business logic, and **CrewAI** strictly allocated to the heuristic and generative job pipeline. 
