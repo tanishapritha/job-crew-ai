@@ -1,0 +1,48 @@
+name: Deploy to Hugging Face Spaces
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config --global user.email "ci@github.com"
+          git config --global user.name "GitHub Actions"
+          
+          # Clone the HF Space repo
+          git clone https://tanishapritha:${HF_TOKEN}@huggingface.co/spaces/tanishapritha/job-crew hf_space
+          
+          # Clear old files (except .git)
+          cd hf_space
+          find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
+          
+          # Copy all project files (excluding secrets and test files)
+          cd ..
+          rsync -av --exclude='.git' \
+                    --exclude='.env' \
+                    --exclude='credentials.json' \
+                    --exclude='__pycache__' \
+                    --exclude='venv' \
+                    --exclude='.venv' \
+                    --exclude='test_*.py' \
+                    --exclude='frontend' \
+                    --exclude='architecture.md' \
+                    ./ hf_space/
+          
+          # Commit and push
+          cd hf_space
+          git add -A
+          git diff --cached --quiet && echo "No changes to deploy" && exit 0
+          git commit -m "Deploy from GitHub Actions - $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push
+          echo "Deployed successfully!"
