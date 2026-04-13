@@ -7,4 +7,4 @@ google-auth>=2.0
 requests>=2.31
 apscheduler>=3.10
 python-dotenv
-python-jobspy>=1.1
+python-jobspy==1.1.75

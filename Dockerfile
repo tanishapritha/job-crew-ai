@@ -1,6 +1,9 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
+
+# Install build tools needed by some packages
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Install dependencies
 COPY requirements.txt .
