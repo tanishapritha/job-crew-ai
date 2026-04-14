@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Automation — Dashboard</title>
+  <meta name="description" content="Job automation dashboard for managing profiles, preferences, and job alerts.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ============ AUTH SCREEN ============ -->
+  <div id="auth-screen" class="screen active">
+    <div class="auth-container">
+      <div class="auth-header">
+        <h1>Job Engine</h1>
+        <p class="subtitle">Automated job alerts, delivered daily.</p>
+      </div>
+
+      <div class="tab-row">
+        <button class="tab active" data-tab="login">Sign In</button>
+        <button class="tab" data-tab="register">Register</button>
+      </div>
+
+      <!-- Login -->
+      <form id="login-form" class="auth-form active">
+        <div class="field">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="you@email.com" required>
+        </div>
+        <div class="field">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn-primary">Sign In</button>
+      </form>
+
+      <!-- Register -->
+      <form id="register-form" class="auth-form">
+        <div class="field">
+          <label for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" placeholder="Jane Doe" required>
+        </div>
+        <div class="field">
+          <label for="reg-email">Email</label>
+          <input type="email" id="reg-email" placeholder="you@email.com" required>
+        </div>
+        <div class="field">
+          <label for="reg-password">Password</label>
+          <input type="password" id="reg-password" placeholder="Min 6 characters" required>
+        </div>
+        <button type="submit" class="btn-primary">Create Account</button>
+      </form>
+
+      <div id="auth-error" class="error-msg"></div>
+    </div>
+  </div>
+
+  <!-- ============ DASHBOARD ============ -->
+  <div id="dashboard-screen" class="screen">
+
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <h2>Job Engine</h2>
+      </div>
+      <div class="top-bar-right">
+        <span id="user-greeting"></span>
+        <button id="logout-btn" class="btn-ghost">Sign Out</button>
+      </div>
+    </header>
+
+    <nav class="dash-tabs">
+      <button class="dash-tab active" data-section="profile">Profile</button>
+      <button class="dash-tab" data-section="preferences">Preferences</button>
+      <button class="dash-tab" data-section="jobs">Jobs</button>
+      <button class="dash-tab" data-section="status">Status</button>
+    </nav>
+
+    <main class="dash-content">
+
+      <!-- Profile -->
+      <section id="section-profile" class="section active">
+        <h3>Your Profile</h3>
+        <div class="card">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Name</span>
+              <span id="prof-name" class="info-value">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span id="prof-email" class="info-value">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">User ID</span>
+              <span id="prof-uid" class="info-value mono">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Status</span>
+              <span id="prof-status" class="info-value badge">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Emails Sent</span>
+              <span id="prof-emails-sent" class="info-value">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Daily Limit</span>
+              <span id="prof-daily-limit" class="info-value">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preferences -->
+      <section id="section-preferences" class="section">
+        <h3>Job Preferences</h3>
+        <form id="pref-form" class="card">
+
+          <div class="field">
+            <label for="pref-domains">Job Titles <span class="hint">Separate with semicolons</span></label>
+            <input type="text" id="pref-domains" placeholder="python developer; data analyst; backend engineer">
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="pref-loc1">Location 1</label>
+              <input type="text" id="pref-loc1" placeholder="Mumbai">
+            </div>
+            <div class="field">
+              <label for="pref-loc2">Location 2</label>
+              <input type="text" id="pref-loc2" placeholder="Bangalore">
+            </div>
+            <div class="field">
+              <label for="pref-loc3">Location 3</label>
+              <input type="text" id="pref-loc3" placeholder="Delhi">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field checkbox-field">
+              <input type="checkbox" id="pref-remote">
+              <label for="pref-remote">Include remote jobs</label>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="pref-experience">Experience Level</label>
+              <select id="pref-experience">
+                <option value="beginner">Beginner / Fresher</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="senior">Senior</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pref-salary">Minimum Salary (Annual, INR)</label>
+              <input type="number" id="pref-salary" placeholder="800000" min="0" step="50000">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">Save Preferences</button>
+          <span id="pref-status-msg" class="inline-msg"></span>
+        </form>
+
+        <div class="search-now-bar">
+          <button id="btn-search-now" class="btn-search">Search Jobs Now</button>
+          <span id="search-status-msg" class="inline-msg"></span>
+        </div>
+      </section>
+
+      <!-- Jobs Results -->
+      <section id="section-jobs" class="section">
+        <div class="jobs-header">
+          <h3>Job Results</h3>
+          <span id="jobs-count" class="jobs-count"></span>
+        </div>
+        <div id="jobs-empty" class="jobs-empty">
+          <p>No jobs loaded yet. Go to <strong>Preferences</strong> and click <strong>Search Jobs Now</strong>.</p>
+        </div>
+        <div id="jobs-grid" class="jobs-grid"></div>
+      </section>
+
+      <!-- Status -->
+      <section id="section-status" class="section">
+        <h3>Account Status</h3>
+        <div class="card">
+          <p class="status-text">Your account is currently: <strong id="status-current">—</strong></p>
+          <div class="status-actions">
+            <button id="btn-pause" class="btn-secondary">Pause Alerts</button>
+            <button id="btn-activate" class="btn-primary">Activate Alerts</button>
+            <button id="btn-unsubscribe" class="btn-danger">Unsubscribe</button>
+          </div>
+          <span id="status-msg" class="inline-msg"></span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
