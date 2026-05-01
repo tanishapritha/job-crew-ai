@@ -5,15 +5,9 @@ from crewai.tools import tool
 import json
 from config import settings
 
-@tool("SendEmailTool")
-def send_email_tool(input: str) -> str:
-    """Sends an email. Input: JSON string with 'to', 'subject', 'body', 'html_body'."""
+def send_email(to_email: str, subject: str, html_body: str) -> str:
+    """Core function to send an email using SMTP settings."""
     try:
-        data = json.loads(input)
-        to_email = data['to']
-        subject = data['subject']
-        html_body = data.get('html_body', data.get('body', ''))
-
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = settings.MAIL_FROM
@@ -28,5 +22,17 @@ def send_email_tool(input: str) -> str:
             server.sendmail(settings.MAIL_FROM, to_email, msg.as_string())
 
         return "sent"
+    except Exception as e:
+        return f"failed: {str(e)}"
+
+@tool("SendEmailTool")
+def send_email_tool(input: str) -> str:
+    """Sends an email. Input: JSON string with 'to', 'subject', 'body', 'html_body'."""
+    try:
+        data = json.loads(input)
+        to_email = data['to']
+        subject = data['subject']
+        html_body = data.get('html_body', data.get('body', ''))
+        return send_email(to_email, subject, html_body)
     except Exception as e:
         return f"failed: {str(e)}"
