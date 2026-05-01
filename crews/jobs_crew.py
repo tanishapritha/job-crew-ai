@@ -99,6 +99,13 @@ def run_campaign() -> dict:
         print("No active users. Exiting.")
         return {"sent": 0, "failed": 0, "no_jobs": 0}
 
+    # Limit the number of users processed daily to 85 to stay within email quotas
+    if len(users) > 85:
+        import random
+        random.shuffle(users)
+        users = users[:85]
+        print(f"Active users exceed 85. Limiting to 85 randomly selected users for today's campaign.")
+
     sent = failed = no_jobs = 0
 
     # Step 2 — Per-user loop (plain Python orchestration)

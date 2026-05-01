@@ -110,11 +110,16 @@ export default function App() {
           />
           <main className="main-content">
             <Header user={user} screen={screen} setView={setView} />
-            <div className="content-area animate-up">
-              {screen === "profile" && <ProfileSection user={user} />}
-              {screen === "preferences" && <PreferencesSection user={user} apiFetch={apiFetch} setUser={setUser} setJobs={setJobs} setScreen={setScreen} />}
-              {screen === "jobs" && <JobsSection jobs={jobs} />}
-              {screen === "status" && <StatusSection user={user} apiFetch={apiFetch} setUser={setUser} />}
+              {user.isAdmin ? (
+                <AdminDashboard apiFetch={apiFetch} />
+              ) : (
+                <>
+                  {screen === "profile" && <ProfileSection user={user} />}
+                  {screen === "preferences" && <PreferencesSection user={user} apiFetch={apiFetch} setUser={setUser} setJobs={setJobs} setScreen={setScreen} />}
+                  {screen === "jobs" && <JobsSection jobs={jobs} />}
+                  {screen === "status" && <StatusSection user={user} apiFetch={apiFetch} setUser={setUser} />}
+                </>
+              )}
             </div>
             {error && <div className="error-banner card"><AlertCircle size={16} /> {error}</div>}
           </main>
@@ -140,7 +145,15 @@ const AuthScreen = ({ onSuccess, apiFetch, theme, toggleTheme }) => {
       if (isRegister) {
         await apiFetch("register", formData);
       }
-      const profile = await apiFetch("login", { email: formData.email, password: formData.password });
+      
+      let profile;
+      try {
+        profile = await apiFetch("login", { email: formData.email, password: formData.password });
+      } catch (loginErr) {
+        // If normal login fails, try admin login
+        profile = await apiFetch("adminLogin", { email: formData.email, password: formData.password });
+      }
+      
       localStorage.setItem("user", JSON.stringify(profile));
       localStorage.setItem("_pw", formData.password);
       onSuccess(profile);
@@ -202,7 +215,9 @@ const AuthScreen = ({ onSuccess, apiFetch, theme, toggleTheme }) => {
 // --- Dashboard Sections ---
 
 const Sidebar = ({ current, setScreen, onLogout, user, theme, toggleTheme }) => {
-  const navItems = [
+  const navItems = user?.isAdmin ? [
+    { id: "admin", label: "Admin Dashboard", icon: Activity }
+  ] : [
     { id: "profile", label: "My Profile", icon: User },
     { id: "preferences", label: "Job Preferences", icon: Settings },
     { id: "jobs", label: "Job Results", icon: Briefcase },
@@ -253,7 +268,10 @@ const Sidebar = ({ current, setScreen, onLogout, user, theme, toggleTheme }) => 
 };
 
 const Header = ({ user, screen, setView }) => {
-  const titles = {
+  const titles = user?.isAdmin ? {
+    admin: "Admin Dashboard",
+    profile: "Admin Dashboard"
+  } : {
     profile: "My Profile",
     preferences: "Job Preferences",
     jobs: "Job Results",
@@ -306,6 +324,25 @@ const ProfileSection = ({ user }) => (
     </div>
   </div>
 );
+
+const AdminDashboard = ({ apiFetch }) => {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    apiFetch("getSystemStats").then(setStats).catch(console.error);
+  }, []);
+
+  if (!stats) return <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>Loading stats...</div>;
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem" }}>
+      <StatCard label="Total Users" value={stats.total_users} icon={User} color="var(--primary)" />
+      <StatCard label="Active Users" value={stats.active_users} icon={Zap} color="var(--success)" />
+      <StatCard label="Paused Users" value={stats.paused_users} icon={Clock} color="var(--warning)" />
+      <StatCard label="Emails Sent" value={stats.total_emails_sent} icon={Mail} color="var(--primary)" />
+    </div>
+  );
+};
 
 const PreferencesSection = ({ user, apiFetch, setUser, setJobs, setScreen }) => {
   const [prefs, setPrefs] = useState({
